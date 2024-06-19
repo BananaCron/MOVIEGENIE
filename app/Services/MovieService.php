@@ -20,7 +20,7 @@ class MovieService
 
     public function getMovies()
     {
-        $response = $this->client->request('GET', 'https://moviedatabase8.p.rapidapi.com/Search/Incep', [
+        $response = $this->client->request('GET', 'https://moviedatabase8.p.rapidapi.com/Random/20', [
             'headers' => [
                 'x-rapidapi-key' => env('RAPIDAPI_KEY'),
                 'x-rapidapi-host' => 'moviedatabase8.p.rapidapi.com',
