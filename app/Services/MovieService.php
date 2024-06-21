@@ -14,59 +14,54 @@ class MovieService
         $this->client = new Client();
         $this->headers = [
             'x-rapidapi-key' => env('RAPIDAPI_KEY'),
-            'x-rapidapi-host' => '', // Will be set per API
+            'x-rapidapi-host' => 'movies-api14.p.rapidapi.com',
         ];
     }
 
     public function getMovies()
     {
-        $response = $this->client->request('GET', 'https://moviedatabase8.p.rapidapi.com/Random/20', [
-            'headers' => [
-                'x-rapidapi-key' => env('RAPIDAPI_KEY'),
-                'x-rapidapi-host' => 'moviedatabase8.p.rapidapi.com',
-            ],
-            'query' => [
-                's' => 'Batman', // Example query to search for movies
-                'r' => 'json'
-            ]
-        ]);
+        try {
+            $response = $this->client->request('GET', 'https://movies-api14.p.rapidapi.com/home', [
+                'headers' => $this->headers,
+            ]);
 
-        return json_decode($response->getBody(), true);
+            $data = json_decode($response->getBody(), true);
+
+            // Check if the response contains data
+            if (empty($data)) {
+                throw new \Exception('Empty response from API');
+            }
+
+            return $data;
+        } catch (\Exception $e) {
+            // Handle and log the exception
+            \Log::error('Error fetching movies: ' . $e->getMessage());
+            return []; // Return empty array or handle as needed
+        }
     }
 
-
-    public function getStreamingAvailability($imdbId)
+    public function getMoviesByTitle($title)
     {
+        try {
+            $response = $this->client->request('GET', 'https://movies-api14.p.rapidapi.com/search', [
+                'headers' => $this->headers,
+                'query' => [
+                    'query' => $title,
+                ],
+            ]);
 
-        $response = $this->client->request('GET', 'https://streaming-availability.p.rapidapi.com/shows/search/title?series_granularity=show&show_type=movie&output_language=en', [
-            'headers' => [
-                'x-rapidapi-key' => env('RAPIDAPI_KEY'),
-                'x-rapidapi-host' => 'streaming-availability.p.rapidapi.com'
-            ],
-            'query' => [
-                'country' => 'US', // Example country code
-                'title' => $imdbId
-            ]
-    ]);
+            $data = json_decode($response->getBody(), true);
 
-        return json_decode($response->getBody(), true);
+            // Check if the response contains data
+            if (empty($data)) {
+                throw new \Exception('Empty response from API');
+            }
+
+            return $data;
+        } catch (\Exception $e) {
+            // Handle and log the exception
+            \Log::error('Error fetching movies by title: ' . $e->getMessage());
+            return []; // Return empty array or handle as needed
+        }
     }
-
-
-    public function getTheatres()
-    {
-        $response = $this->client->request('GET', 'https://flixster.p.rapidapi.com/theaters/list?zipCode=90002&radius=50', [
-            'headers' => [
-                'x-rapidapi-key' => env('RAPIDAPI_KEY'),
-                'x-rapidapi-host' => 'flixster.p.rapidapi.com',
-            ],
-            'query' => [
-                'limit' => '20', // adjust limit as needed
-                'page' => '1'
-            ]
-    ]);
-
-        return json_decode($response->getBody(), true);
-    }
-
 }

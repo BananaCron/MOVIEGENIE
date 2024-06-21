@@ -23,10 +23,15 @@ $app = new Laravel\Lumen\Application(
     dirname(__DIR__)
 );
 
-// $app->withFacades();
+$app->withFacades();
 
-// $app->withEloquent();
+$app->withEloquent();
 
+use Illuminate\Validation\DatabasePresenceVerifier;
+
+$app->bind('Illuminate\Contracts\Validation\PresenceVerifier', function ($app) {
+    return new DatabasePresenceVerifier($app['db']->connection());
+});
 /*
 |--------------------------------------------------------------------------
 | Register Container Bindings
@@ -37,13 +42,9 @@ $app = new Laravel\Lumen\Application(
 | your own bindings here if you like or you can make another file.
 |
 */
-
-$app->configure('jwt');
-
-$app->register(App\Providers\AuthServiceProvider::class);
-
-// Add this line
-$app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
+$app->bind('App\Services\UserService', function ($app) {
+    return new \App\Services\UserService();
+});
 
 
 $app->register(
@@ -71,8 +72,12 @@ $app->singleton(
 | the default version. You may register other files below as needed.
 |
 */
-
+$app->configure('jwt');
+// Add this line
+$app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
 $app->configure('app');
+$app->configure('auth');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -103,8 +108,9 @@ $app->routeMiddleware([
 |
 */
 
-// $app->register(App\Providers\AppServiceProvider::class);
-// $app->register(App\Providers\AuthServiceProvider::class);
+$app->register(App\Providers\JwtAuthServiceProvider::class);
+$app->register(App\Providers\AppServiceProvider::class);
+$app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 
 /*

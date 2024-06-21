@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\MovieService;
+use Illuminate\Http\Request;
 
 class MovieController extends Controller
 {
@@ -19,15 +20,14 @@ class MovieController extends Controller
         return response()->json($data);
     }
 
-    public function getStreamingAvailability($imdbId)
+    public function getMoviesByTitle(Request $request)
     {
-        $data = $this->movieService->getStreamingAvailability($imdbId);
-        return response()->json($data);
-    }
-
-    public function getTheatres()
-    {
-        $data = $this->movieService->getTheatres();
-        return response()->json($data);
+        $title = $request->input('title');
+        if ($title) {
+            $data = $this->movieService->getMoviesByTitle($title);
+            return response()->json($data);
+        } else {
+            return response()->json(['error' => 'Title parameter is required'], 400);
+        }
     }
 }
