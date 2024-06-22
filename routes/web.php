@@ -17,11 +17,17 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
+
 $router->post('/register', 'AuthController@register');
 $router->post('/login', 'AuthController@login');
-$router->get('/users', ['uses' => 'AuthController@showAllUsers']);
-$router->delete('/users/{id}', ['uses' => 'AuthController@deleteUser']);
-$router->put('/users/{id}', ['uses' => 'AuthController@updateUser']);
+
+// Protect these routes with JWT authentication
+$router->group(['middleware' => 'jwt.auth'], function () use ($router) {
+    $router->get('/users', 'AuthController@showAllUsers');
+    $router->delete('/users/{id}', 'AuthController@deleteUser');
+    $router->put('/users/{id}', 'AuthController@updateUser');
+});
+
 
 $router->get('/movies', 'MovieController@getMovies');
 $router->get('/movies/search', 'MovieController@getMoviesByTitle');

@@ -3,116 +3,88 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use App\Services\UserService;
+use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-    /**
-     * Register a new user.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
+    protected $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
     public function register(Request $request)
     {
-        $this->validate($request, [
+        $validator = Validator::make($request->all(), [
             'email' => 'required|email|unique:user_table',
             'username' => 'required|unique:user_table',
             'password' => 'required|min:6',
         ]);
 
-        $user = User::create([
-            'email' => $request->email,
-            'username' => $request->username,
-            'password' => Hash::make($request->password),
-        ]);
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+
+        $userData = [
+            'email' => $request->input('email'),
+            'username' => $request->input('username'),
+            'password' => $request->input('password'),
+        ];
+
+        $user = $this->userService->register($userData);
 
         return response()->json(['message' => 'User successfully registered'], 201);
     }
 
-    /**
-     * Login a user and return a JWT token.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function login(Request $request)
     {
-        $credentials = $request->only(['email', 'password']);
+        try {
+            $credentials = $request->only(['email', 'password']);
 
-        if (!$token = JWTAuth::attempt($credentials)) {
-            return response()->json(['error' => 'Invalid credentials'], 401);
+            if (!$token = JWTAuth::attempt($credentials)) {
+                return response()->json(['error' => 'Invalid credentials'], 401);
+            }
+
+            return response()->json([
+                'message' => 'Log in successfully',
+                'token' => $token
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Login failed. Please try again later.'], 500);
         }
-
-        return response()->json([
-            'message' => 'Log in successfully',
-            'token' => $token
-        ]);
     }
 
-    /**
-     * Show all registered users.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function showAllUsers()
     {
-        $users = User::all();
+        $users = $this->userService->getAllUsers();
 
         return response()->json($users);
     }
 
-    /**
-     * Delete a user by ID.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function deleteUser($id)
     {
-        $user = User::find($id);
+        $deleted = $this->userService->deleteUser($id);
 
-        if (!$user) {
+        if (!$deleted) {
             return response()->json(['error' => 'User not found'], 404);
         }
-
-        $user->delete();
 
         return response()->json(['message' => 'User successfully deleted']);
     }
 
-    /**
-     * Update a user by ID.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function updateUser(Request $request, $id)
     {
-        $user = User::find($id);
+        $userData = $request->only(['email', 'username', 'password']);
 
-        if (!$user) {
+        $updatedUser = $this->userService->updateUser($id, $userData);
+
+        if (!$updatedUser) {
             return response()->json(['error' => 'User not found'], 404);
         }
 
-        $this->validate($request, [
-            'email' => 'sometimes|required|email|unique:user_table,email,' . $id,
-            'username' => 'sometimes|required|unique:user_table,username,' . $id,
-            'password' => 'sometimes|required|min:6',
-        ]);
-
-        $user->email = $request->get('email', $user->email);
-        $user->username = $request->get('username', $user->username);
-
-        if ($request->has('password')) {
-            $user->password = Hash::make($request->password);
-        }
-
-        $user->save();
-
-        return response()->json(['message' => 'User successfully updated', 'user' => $user]);
+        return response()->json(['message' => 'User successfully updated', 'user' => $updatedUser]);
     }
 }

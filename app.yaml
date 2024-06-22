@@ -1,0 +1,30 @@
+runtime: php82
+env: standard
+
+handlers:
+  - url: /.*
+    script: public/index.php
+
+env_variables:
+  APP_KEY: mjDLtFxxuYjH0slScD3xQSI0lkLv9lyJkjf4GPNy0ZB075hwEH5uqqiMAV8QHcAL
+  APP_ENV: production
+  DB_CONNECTION: mysql
+  DB_HOST: 127.0.0.1
+  DB_PORT: 3306
+  DB_DATABASE: moviegenie
+  DB_USERNAME: jetvon
+  DB_PASSWORD: 143_JetherVoughn
+  DB_SOCKET: /cloudsql/moviegenie-427106:asia-southeast1:moviegenie
+  GOOGLE_CLOUD_SQL_CONNECTION_NAME: moviegenie-427106:asia-southeast1:moviegenie
+  # Add other environment variables your application requires
+
+# Automatic scaling based on request rate
+automatic_scaling:
+  min_instances: 1
+  max_instances: 5
+
+# Ensure instance memory and CPU are sufficient for Lumen
+resources:
+  cpu: 1
+  memory_gb: 0.5
+  disk_size_gb: 10

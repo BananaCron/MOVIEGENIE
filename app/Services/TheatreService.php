@@ -34,7 +34,7 @@ class TheatreService
     }
 
 
-    public function getOpeningMovies($countryId = 'usa')
+    public function getOpeningMovies($countryId = null)
     {
         $response = $this->client->request('GET', 'https://flixster.p.rapidapi.com/movies/get-opening', [
             'headers' => $this->headers,
