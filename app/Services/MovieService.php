@@ -9,6 +9,7 @@ class MovieService
     protected $client;
     protected $headers;
 
+    // Constructor to initialize the HTTP client and headers for the API requests
     public function __construct()
     {
         $this->client = new Client();
@@ -18,13 +19,16 @@ class MovieService
         ];
     }
 
+    // Method to fetch the list of movies
     public function getMovies()
     {
         try {
+            // Make a GET request to the API endpoint
             $response = $this->client->request('GET', 'https://movies-api14.p.rapidapi.com/home', [
                 'headers' => $this->headers,
             ]);
 
+            // Decode the response body to an associative array
             $data = json_decode($response->getBody(), true);
 
             // Check if the response contains data
@@ -32,6 +36,7 @@ class MovieService
                 throw new \Exception('Empty response from API');
             }
 
+            // Return the data
             return $data;
         } catch (\Exception $e) {
             // Handle and log the exception
@@ -40,9 +45,11 @@ class MovieService
         }
     }
 
+    // Method to fetch movies by title
     public function getMoviesByTitle($title)
     {
         try {
+            // Make a GET request to the API endpoint with the title as a query parameter
             $response = $this->client->request('GET', 'https://movies-api14.p.rapidapi.com/search', [
                 'headers' => $this->headers,
                 'query' => [
@@ -50,6 +57,7 @@ class MovieService
                 ],
             ]);
 
+            // Decode the response body to an associative array
             $data = json_decode($response->getBody(), true);
 
             // Check if the response contains data
@@ -57,6 +65,7 @@ class MovieService
                 throw new \Exception('Empty response from API');
             }
 
+            // Return the data
             return $data;
         } catch (\Exception $e) {
             // Handle and log the exception

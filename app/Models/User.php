@@ -23,12 +23,21 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      */
     protected $fillable = ['email', 'username', 'password'];
 
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
     protected $hidden = [
         'password',
     ];
 
-        // Disable timestamps
-        public $timestamps = true;
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = true;
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
